@@ -8,6 +8,7 @@ import android.hardware.SensorManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -26,6 +28,7 @@ import androidx.compose.ui.Modifier
 import com.darkwhite.sensors.Utils.calculatePitchAndRoll
 import com.darkwhite.sensors.Utils.isSurfaceLeveled
 import com.darkwhite.sensors.Utils.round
+import com.darkwhite.sensors.audio.AudioUi
 import com.darkwhite.sensors.ui.theme.SensorsTheme
 
 const val MAX_VALUE = 9.81f
@@ -45,6 +48,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var y: Float by mutableFloatStateOf(0f)
     private var z: Float by mutableFloatStateOf(0f)
     private var lightLevel: Float by mutableFloatStateOf(0f)
+    
+    private val viewModel: MainViewModel by viewModels()
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,6 +77,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainScreen(
+                        viewModel = viewModel,
                         sensorManager = sensorManager,
                         sensorsList = sensorsList,
                         accelerometer = accelerometer,
@@ -105,6 +111,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     override fun onPause() {
         super.onPause()
         sensorManager.unregisterListener(this)
+        viewModel.stopRecording()
     }
     
     override fun onSensorChanged(event: SensorEvent?) {
@@ -132,6 +139,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
 @Composable
 fun MainScreen(
+    viewModel: MainViewModel,
     sensorManager: SensorManager,
     sensorsList: List<String>,
     accelerometer: Sensor?,
@@ -141,6 +149,38 @@ fun MainScreen(
     lightSensor: Sensor?,
     lightLevel: Float,
     modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center
+    ) {
+        val isRecording by viewModel.isRecording.collectAsState()
+        AudioUi(
+            isRecording = isRecording,
+            onClick = viewModel::onClick,
+        )
+        
+        SensorsUi(
+            x = x,
+            y = y,
+            z = z,
+            accelerometer = accelerometer,
+            lightSensor = lightSensor,
+            lightLevel = lightLevel,
+            sensorsList = sensorsList
+        )
+    }
+}
+
+@Composable
+private fun SensorsUi(
+    x: Float,
+    y: Float,
+    z: Float,
+    accelerometer: Sensor?,
+    lightSensor: Sensor?,
+    lightLevel: Float,
+    sensorsList: List<String>
 ) {
     val sBuilder by remember(x, y, z) {
         derivedStateOf {
@@ -164,25 +204,20 @@ fun MainScreen(
         }
     }
     
-    Column(
-        modifier = modifier.verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Center
-    ) {
-        if (accelerometer != null) {
-            Text(text = sBuilder, style = MaterialTheme.typography.titleLarge)
-        } else {
-            Text(text = "No Accelerometer Available")
-        }
-        if (lightSensor != null) {
-            Text(
-                text = "LightSensor available = $lightLevel",
-                style = MaterialTheme.typography.titleLarge
-            )
-        } else {
-            Text(text = "No LightSensor Available")
-        }
-        sensorsList.forEach {
-            Text(text = it)
-        }
+    if (accelerometer != null) {
+        Text(text = sBuilder, style = MaterialTheme.typography.titleLarge)
+    } else {
+        Text(text = "No Accelerometer Available")
+    }
+    if (lightSensor != null) {
+        Text(
+            text = "LightSensor available = $lightLevel",
+            style = MaterialTheme.typography.titleLarge
+        )
+    } else {
+        Text(text = "No LightSensor Available")
+    }
+    sensorsList.forEach {
+        Text(text = it)
     }
 }

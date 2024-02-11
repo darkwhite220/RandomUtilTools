@@ -2,6 +2,7 @@ package com.darkwhite.sensors
 
 import kotlin.math.abs
 import kotlin.math.atan2
+import kotlin.math.sqrt
 
 object Utils {
     
@@ -48,4 +49,13 @@ object Utils {
         repeat(decimals) { multiplier *= 10 }
         return kotlin.math.round(this * multiplier) / multiplier
     }
+    
+    fun calculateRMS(buffer: ShortArray): Double {
+        var sum = 0.0
+        for (sample in buffer) {
+            sum += sample.toDouble() * sample.toDouble()
+        }
+        return sqrt(sum / buffer.size)
+    }
+    
 }
