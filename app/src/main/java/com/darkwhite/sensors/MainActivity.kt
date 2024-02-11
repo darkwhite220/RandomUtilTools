@@ -86,13 +86,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     
     override fun onResume() {
         super.onResume()
-//        accelerometer?.let { accelerometer ->
-//            sensorManager.registerListener(
-//                this,
-//                accelerometer,
-//                SensorManager.SENSOR_DELAY_NORMAL
-//            )
-//        }
+        accelerometer?.let { accelerometer ->
+            sensorManager.registerListener(
+                this,
+                accelerometer,
+                SensorManager.SENSOR_DELAY_NORMAL
+            )
+        }
         lightSensor?.let { lightSensor ->
             sensorManager.registerListener(
                 this,
@@ -109,13 +109,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
-            println("event.values[0] ${event.sensor.type} ${event.values[0]}")
-//            if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-//                x = event.values[0]
-//                y = event.values[1]
-//                z = event.values[2]
-//                println("onSensorChanged: $x, $y, $z")
-//            }
+//            println("event.values[0] ${event.sensor.type} ${event.values[0]}")
+            if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                x = event.values[0]
+                y = event.values[1]
+                z = event.values[2]
+                println("onSensorChanged: $x, $y, $z")
+            }
             if (event.sensor.type == Sensor.TYPE_PROXIMITY) {
                 // Handle light sensor data
                 lightLevel = event.values[0]
