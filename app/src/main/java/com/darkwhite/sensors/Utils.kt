@@ -48,17 +48,4 @@ object Utils {
         repeat(decimals) { multiplier *= 10 }
         return kotlin.math.round(this * multiplier) / multiplier
     }
-    
-    // Function to calculate distance based on altitude
-    fun calculateDistanceFromAltitude(altitude: Float): Float {
-        // Your distance calculation logic goes here
-        // This might involve using some standard atmospheric models
-        // or other methods to convert altitude to distance
-        // For simplicity, you can use a linear approximation or lookup table
-        
-        // Example: Linear approximation for demonstration purposes
-        // You may need to adjust these coefficients based on your specific use case
-        val slope = 0.0065f  // Standard lapse rate for troposphere
-        return altitude * slope
-    }
 }

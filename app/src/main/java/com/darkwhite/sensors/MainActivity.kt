@@ -23,7 +23,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.darkwhite.sensors.Utils.calculateDistanceFromAltitude
 import com.darkwhite.sensors.Utils.calculatePitchAndRoll
 import com.darkwhite.sensors.Utils.isSurfaceLeveled
 import com.darkwhite.sensors.Utils.round
@@ -45,6 +44,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var x: Float by mutableFloatStateOf(0f)
     private var y: Float by mutableFloatStateOf(0f)
     private var z: Float by mutableFloatStateOf(0f)
+    private var lightLevel: Float by mutableFloatStateOf(0f)
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,9 +58,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         // Get a list of all available sensors
         val sensorList: List<Sensor> = sensorManager.getSensorList(Sensor.TYPE_ALL)
         
+        val sensorsList = mutableListOf<String>()
         // Print the names of all sensors
         for (sensor in sensorList) {
-            println("Sensor Name: ${sensor.name}, Type: ${sensor.type}")
+            sensorsList.add("Sensor Name: ${sensor.name}, Type: ${sensor.type}")
         }
         
         setContent {
@@ -72,9 +73,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 ) {
                     MainScreen(
                         sensorManager = sensorManager,
+                        sensorsList = sensorsList,
                         accelerometer = accelerometer,
                         x = x, y = y, z = z,
                         lightSensor = lightSensor,
+                        lightLevel = lightLevel,
                     )
                 }
             }
@@ -90,13 +93,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 //                SensorManager.SENSOR_DELAY_NORMAL
 //            )
 //        }
-//        lightSensor?.let { lightSensor ->
-//            sensorManager.registerListener(
-//                this,
-//                lightSensor,
-//                SensorManager.SENSOR_DELAY_NORMAL
-//            )
-//        }
+        lightSensor?.let { lightSensor ->
+            sensorManager.registerListener(
+                this,
+                lightSensor,
+                SensorManager.SENSOR_DELAY_NORMAL
+            )
+        }
     }
     
     override fun onPause() {
@@ -113,11 +116,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 //                z = event.values[2]
 //                println("onSensorChanged: $x, $y, $z")
 //            }
-//            if (event.sensor.type == Sensor.TYPE_PROXIMITY) {
-//                // Handle light sensor data
-//                val lightLevel = event.values[0]
-//                println("lightLevel $lightLevel")
-//            }
+            if (event.sensor.type == Sensor.TYPE_PROXIMITY) {
+                // Handle light sensor data
+                lightLevel = event.values[0]
+                println("lightLevel $lightLevel")
+            }
         }
     }
     
@@ -130,11 +133,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 @Composable
 fun MainScreen(
     sensorManager: SensorManager,
+    sensorsList: List<String>,
     accelerometer: Sensor?,
     x: Float,
     y: Float,
     z: Float,
     lightSensor: Sensor?,
+    lightLevel: Float,
     modifier: Modifier = Modifier,
 ) {
     val sBuilder by remember(x, y, z) {
@@ -169,9 +174,15 @@ fun MainScreen(
             Text(text = "No Accelerometer Available")
         }
         if (lightSensor != null) {
-            Text(text = "LightSensor available", style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = "LightSensor available = $lightLevel",
+                style = MaterialTheme.typography.titleLarge
+            )
         } else {
             Text(text = "No LightSensor Available")
+        }
+        sensorsList.forEach {
+            Text(text = it)
         }
     }
 }
