@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainViewModel : ViewModel() {
     
@@ -22,9 +21,7 @@ class MainViewModel : ViewModel() {
     
     private fun startRecording() {
         viewModelScope.launch(Dispatchers.IO) {
-            withContext(Dispatchers.Main) {
-                _isRecording.value = true
-            }
+            _isRecording.value = true
             audioRecorder.startRecording()
             _isRecording.value = false
         }
@@ -32,9 +29,7 @@ class MainViewModel : ViewModel() {
     
     fun stopRecording() {
         viewModelScope.launch(Dispatchers.IO) {
-            withContext(Dispatchers.Main) {
-                _isRecording.value = false
-            }
+            _isRecording.value = false
             audioRecorder.stopRecording()
         }
     }

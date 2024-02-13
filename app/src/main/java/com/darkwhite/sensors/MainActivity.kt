@@ -97,7 +97,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             sensorManager.registerListener(
                 this,
                 accelerometer,
-                SensorManager.SENSOR_DELAY_NORMAL
+                SensorManager.SENSOR_DELAY_UI
             )
         }
         lightSensor?.let { lightSensor ->
