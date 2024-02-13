@@ -29,6 +29,7 @@ import com.darkwhite.sensors.Utils.calculatePitchAndRoll
 import com.darkwhite.sensors.Utils.isSurfaceLeveled
 import com.darkwhite.sensors.Utils.round
 import com.darkwhite.sensors.audio.AudioUi
+import com.darkwhite.sensors.sensors.SensorsUi
 import com.darkwhite.sensors.ui.theme.SensorsTheme
 
 const val MAX_VALUE = 9.81f
@@ -169,55 +170,5 @@ fun MainScreen(
             lightLevel = lightLevel,
             sensorsList = sensorsList
         )
-    }
-}
-
-@Composable
-private fun SensorsUi(
-    x: Float,
-    y: Float,
-    z: Float,
-    accelerometer: Sensor?,
-    lightSensor: Sensor?,
-    lightLevel: Float,
-    sensorsList: List<String>
-) {
-    val sBuilder by remember(x, y, z) {
-        derivedStateOf {
-            val (pitch, roll) = calculatePitchAndRoll(floatArrayOf(x, y, z))
-            val (pitch1, roll1) = calculatePitchAndRoll(floatArrayOf(x, z, y))
-            val (pitch2, roll2) = calculatePitchAndRoll(floatArrayOf(z, y, x))
-            """
-            X=$x
-            Y=$y
-            Z=$z
-            
-            ${(x / MAX_VALUE * 100).round(2)}%, ${(y / MAX_VALUE * 100).round(2)}%, ${
-                (z /
-                    MAX_VALUE * 100).round(2)
-            }%
-            
-            Flat Leveled: ${isSurfaceLeveled(pitch, roll)}, ${pitch.round(2)}, ${roll.round(2)}
-            Up Leveled  : ${isSurfaceLeveled(pitch1, roll1)}, ${pitch1.round(2)}, ${roll1.round(2)}
-            Side Leveled: ${isSurfaceLeveled(pitch2, roll2)}, ${pitch2.round(2)}, ${roll2.round(2)}
-        """.trimIndent()
-        }
-    }
-    
-    if (accelerometer != null) {
-        Text(text = sBuilder, style = MaterialTheme.typography.titleLarge)
-    } else {
-        Text(text = "No Accelerometer Available")
-    }
-    if (lightSensor != null) {
-        Text(
-            text = "LightSensor available = $lightLevel",
-            style = MaterialTheme.typography.titleLarge
-        )
-    } else {
-        Text(text = "No LightSensor Available")
-    }
-    sensorsList.forEach {
-        Text(text = it)
     }
 }
